@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>壮壮FIT 配送叫单规划</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; background: #f0f2f5; color: #333; padding: 10px; min-height: 100vh; }
+  .container { max-width: 430px; margin: 0 auto; }
+  .card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .header { text-align: center; padding: 8px 0 4px; }
+  .header h1 { font-size: 20px; color: #1a73e8; font-weight: 700; }
+  .header p { font-size: 13px; color: #888; margin-top: 2px; }
+  
+  .paste-area { margin-top: 12px; }
+  .paste-area textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    background: #fafafa;
+  }
+  .paste-area textarea:focus { border-color: #1a73e8; }
+  .paste-area textarea::placeholder { color: #bbb; }
+  
+  .paste-tip { font-size: 12px; color: #999; margin-top: 6px; }
+  .paste-tip span { color: #1a73e8; font-weight: 600; }
+  
+  .settings-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+  .settings-row label { font-size: 14px; color: #555; white-space: nowrap; }
+  .settings-row input { width: 70px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; text-align: center; }
+  
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+    margin-top: 8px;
+  }
+  .btn-primary { background: #34a853; }
+  .btn-primary:active { background: #2d8e47; }
+  .btn-copy { background: #ea4335; margin-top: 10px; }
+  .btn-copy:active { background: #d93025; }
+  
+  .status { text-align: center; font-size: 13px; color: #1a73e8; margin: 8px 0; min-height: 20px; }
+  
+  .result-card { display: none; }
+  .result-card.show { display: block; }
+  
+  .result-card h2 { font-size: 16px; text-align: center; margin-bottom: 10px; color: #333; }
+  
+  .plan-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .plan-table th {
+    background: #1a73e8;
+    color: #fff;
+    padding: 10px 6px;
+    font-weight: 600;
+    font-size: 12px;
+    text-align: center;
+  }
+  .plan-table td {
+    padding: 10px 6px;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+    font-size: 13px;
+  }
+  .plan-table tr:nth-child(even) { background: #f8f9fa; }
+  .plan-table tr:hover { background: #e8f0fe; }
+  
+  .call-time { font-weight: 700; color: #34a853; font-size: 14px; }
+  .arrive-time { font-weight: 700; color: #1a73e8; }
+  .dist-col { color: #ea4335; font-weight: 600; }
+  .error-text { color: #ff4444; font-size: 12px; }
+  
+  .goods-cell { text-align: left; font-size: 12px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .addr-cell { text-align: left; font-size: 12px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  
+  .summary { background: #e8f5e9; border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 13px; }
+  .summary strong { color: #34a853; }
+  .summary .error-count { color: #ff4444; }
+  
+  .footer { text-align: center; font-size: 11px; color: #ccc; margin-top: 16px; }
+  
+  /* 订单预览 */
+  .orders-preview { margin-top: 10px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px; padding: 8px; background: #fafafa; }
+  .orders-preview h3 { font-size: 13px; color: #555; margin-bottom: 6px; }
+  .preview-item { font-size: 12px; color: #666; padding: 4px 0; border-bottom: 1px dashed #eee; line-height: 1.4; }
+  .preview-item:last-child { border-bottom: none; }
+  .preview-item .tag { display: inline-block; background: #e3f2fd; color: #1a73e8; font-size: 11px; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
+  .preview-item .error { color: #ff4444; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="card">
+    <div class="header">
+      <h1>🚚 壮壮FIT 叫单规划</h1>
+      <p>门店：清凤时代城 · 粘贴订单 → 自动规划</p>
+    </div>
+
+    <div class="paste-area">
+      <textarea id="orderInput" placeholder="📋 直接粘贴订单信息，例如：
+
+--8/28 11:30--
+1. 奥尔良鸡腿蛋白Pro碗+香蕉南瓜红薯+香草柠檬蘸水
+📝收件人：李先生，15680868660
+🏠地址: 成都市双流区和祥二街卓锦荟专家公寓前台
+
+2. 冬阴功鸡腿虾仁鲜蔬锅（加荞麦面）+香蕉
+📝收件人：聂先生，13076090208
+🏠地址：新加坡创新中心e栋东门7楼
+
+--8/28 11:45--
+3. 牛肉片·鸡腿蛋白Pro碗+香菇牛肉酱
+📝收件人：李涵，18848235524
+🏠地址：成都市武侯区天晖路360号晶科1号商务写字楼"></textarea>
+      <p class="paste-tip">格式：「--日期 时间--」分组 + 序号. 商品 + 收件人 + 地址，自动识别</p>
+    </div>
+
+    <div class="settings-row">
+      <label>预留时间</label>
+      <input type="number" id="bufferTime" value="5" min="1" max="30">
+      <span style="font-size:13px;color:#555;">分钟</span>
+    </div>
+
+    <button class="btn btn-primary" onclick="parseAndPlan()">📊 生成叫单规划</button>
+  </div>
+
+  <div class="card result-card" id="resultCard">
+    <h2>⏰ 叫单时间表</h2>
+    <div class="summary" id="summary"></div>
+    <div class="status" id="status"></div>
+    <table class="plan-table" id="planTable">
+      <thead>
+        <tr>
+          <th>叫单<br>时间</th>
+          <th>送达<br>时间</th>
+          <th>收件人</th>
+          <th style="width:100px;">商品</th>
+          <th>距离<br>/耗时</th>
+          <th style="width:100px;">地址</th>
+        </tr>
+      </thead>
+      <tbody id="planBody"></tbody>
+    </table>
+    <button class="btn btn-copy" onclick="copyPlan()">📋 一键复制</button>
+  </div>
+
+  <p class="footer">壮壮FIT 配送叫单规划工具 · v2</p>
+
+</div>
+
+<script>
+// 高德API Key（内置）
+const AMAP_KEY = "e9973067b859c02990c6b19729ffdce7";
+const STORE_ADDR = "成都市天府大道中段500号";
+const AMAP_GEO_URL = "https://restapi.amap.com/v3/geocode/geo";
+const AMAP_DRIVE_URL = "https://restapi.amap.com/v3/direction/driving";
+
+// ===== 解析订单文本 =====
+function parseOrders(text) {
+  const orders = [];
+  let currentTime = '';
+  let currentGoods = '';
+  let currentName = '';
+  let currentPhone = '';
+  let currentAddr = '';
+  let currentNote = '';
+
+  const lines = text.split('\n');
+
+  function flush() {
+    if (currentGoods && currentAddr && currentTime) {
+      orders.push({
+        goods: currentGoods.trim(),
+        name: currentName.trim(),
+        phone: currentPhone.trim(),
+        addr: currentAddr.trim(),
+        time: currentTime,
+        note: currentNote.trim()
+      });
+    }
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // 时间分组行：--日期 时间-- 或 --时间--
+    const timeMatch = trimmed.match(/--.*?(\d{1,2}:\d{2})--/);
+    if (timeMatch) {
+      flush();
+      currentTime = timeMatch[1];
+      currentGoods = '';
+      currentName = '';
+      currentPhone = '';
+      currentAddr = '';
+      currentNote = '';
+      continue;
+    }
+
+    // 商品行（序号开头）
+    const goodsMatch = trimmed.match(/^(\d+)\./);
+    if (goodsMatch) {
+      flush();
+      currentGoods = trimmed.replace(/^\d+\.\s*/, '');
+      continue;
+    }
+
+    // 收件人行
+    if (trimmed.includes('收件人')) {
+      const match = trimmed.match(/[：:]\s*(.+)/);
+      if (match) {
+        // 按逗号/顿号拆分，第一个是姓名
+        const parts = match[1].split(/[，,\s]+/);
+        currentName = parts[0] || '';
+        // 提取手机号
+        const phoneMatch = match[1].match(/1[3-9]\d{9}/);
+        if (phoneMatch) currentPhone = phoneMatch[0];
+      }
+      continue;
+    }
+
+    // 地址行
+    if (trimmed.includes('地址')) {
+      const match = trimmed.match(/[：:]\s*(.+)/);
+      if (match) currentAddr = match[1].trim();
+      continue;
+    }
+  }
+
+  flush(); // 最后一单
+  return orders;
+}
+
+// ===== 高德地理编码 =====
+async function geocode(address) {
+  try {
+    const url = `${AMAP_GEO_URL}?address=${encodeURIComponent(address)}&key=${AMAP_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.status === '1' && data.count !== '0') {
+      const loc = data.geocodes[0].location.split(',');
+      return { lng: loc[0], lat: loc[1] };
+    }
+    return null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ===== 驾车距离 =====
+async function getDrivingDistance(origLng, origLat, destLng, destLat) {
+  try {
+    const url = `${AMAP_DRIVE_URL}?origin=${origLng},${origLat}&destination=${destLng},${destLat}&key=${AMAP_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.status === '1') {
+      const path = data.route.paths[0];
+      return {
+        dist_m: parseInt(path.distance),
+        dur_s: parseInt(path.duration)
+      };
+    }
+    return null;
+  } catch(e) {
+    return null;
+  }
+}
+
+// ===== 时间计算 =====
+function parseTime(timeStr) {
+  const [h, m] = timeStr.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function formatTime(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+
+// ===== 主流程 =====
+async function parseAndPlan() {
+  const input = document.getElementById('orderInput').value.trim();
+  const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
+  const status = document.getElementById('status');
+  const summary = document.getElementById('summary');
+  const planBody = document.getElementById('planBody');
+  
+  if (!input) {
+    alert('请先粘贴订单信息');
+    return;
+  }
+  
+  // 解析
+  const orders = parseOrders(input);
+  if (orders.length === 0) {
+    alert('未识别到订单，请检查格式');
+    return;
+  }
+  
+  summary.innerHTML = `共识别 <strong>${orders.length}</strong> 单，正在计算距离...`;
+  planBody.innerHTML = '';
+  status.textContent = '正在获取门店坐标...';
+  
+  // 门店坐标
+  const storeLoc = await geocode(STORE_ADDR);
+  if (!storeLoc) {
+    status.textContent = '❌ 门店地址解析失败';
+    return;
+  }
+  
+  // 逐单计算
+  const results = [];
+  let done = 0;
+  
+  for (const o of orders) {
+    const destLoc = await geocode(o.addr);
+    if (!destLoc) {
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败' });
+      done++;
+      status.textContent = '计算中... ' + done + '/' + orders.length;
+      continue;
+    }
+    
+    const dist = await getDrivingDistance(storeLoc.lng, storeLoc.lat, destLoc.lng, destLoc.lat);
+    if (!dist) {
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '路径规划失败' });
+      done++;
+      status.textContent = '计算中... ' + done + '/' + orders.length;
+      continue;
+    }
+    
+    const dist_km = dist.dist_m / 1000;
+    const ebike_min = Math.round(dist_km / 25 * 60);
+    const totalMin = parseTime(o.time);
+    const callTime = totalMin - ebike_min - buffer;
+    const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
+    
+    results.push({ ...o, dist_km: dist_km.toFixed(1), ebike_min, callTime: callTimeStr, error: null });
+    done++;
+    status.textContent = '计算中... ' + done + '/' + orders.length;
+    await new Promise(r => setTimeout(r, 300));
+  }
+  
+  // 排序（按叫单时间）
+  results.sort((a, b) => {
+    const ta = a.callTime === '-' || a.callTime === '⚠ 时间不足' ? 999999 : parseTime(a.callTime);
+    const tb = b.callTime === '-' || b.callTime === '⚠ 时间不足' ? 999999 : parseTime(b.callTime);
+    return ta - tb;
+  });
+  
+  // 渲染
+  planBody.innerHTML = '';
+  let okCount = 0, errCount = 0;
+  
+  for (const r of results) {
+    if (r.error) errCount++;
+    else okCount++;
+    
+    const tr = document.createElement('tr');
+    const timeClass = r.callTime === '⚠ 时间不足' ? 'error-text' : 'call-time';
+    const distText = r.dist_km === '?' ? '-' : r.dist_km + 'km';
+    
+    tr.innerHTML = `
+      <td class="${timeClass}">${r.callTime}</td>
+      <td class="arrive-time">${r.time}</td>
+      <td>${r.name || '-'}</td>
+      <td class="goods-cell" title="${r.goods}">${r.goods}</td>
+      <td class="dist-col" title="电瓶车约${r.ebike_min}min">${distText}</td>
+      <td class="addr-cell" title="${r.addr}">${r.addr}</td>
+    `;
+    planBody.appendChild(tr);
+  }
+  
+  summary.innerHTML = `✅ 规划完成 · 成功 <strong>${okCount}</strong> 单` + (errCount > 0 ? ` · <span class="error-count">失败 ${errCount} 单</span>` : '');
+  status.textContent = '';
+  document.getElementById('resultCard').classList.add('show');
+}
+
+// ===== 一键复制 =====
+function copyPlan() {
+  const rows = document.querySelectorAll('#planBody tr');
+  if (rows.length === 0) return;
+  
+  let text = '🚚 叫单时间表\n\n';
+  text += '门店：清凤时代城\n';
+  text += '预留时间：' + document.getElementById('bufferTime').value + '分钟\n\n';
+  
+  text += '| 叫单时间 | 送达时间 | 收件人 | 商品 | 距离 | 地址 |\n';
+  text += '|---------|---------|--------|------|------|------|\n';
+  
+  for (const row of rows) {
+    const cells = row.querySelectorAll('td');
+    const vals = [];
+    for (const c of cells) vals.push(c.textContent.trim());
+    text += '| ' + vals.join(' | ') + ' |\n';
+  }
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert('✅ 已复制到剪贴板');
+    }).catch(() => { fallbackCopy(text); });
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  alert('✅ 已复制到剪贴板');
+}
+</script>
+
+</body>
+</html>
