@@ -460,8 +460,8 @@ async function parseAndPlan() {
   let done = 0;
 
   for (const o of orders) {
-    const cleanAddr = cleanAddr(o.addr);
-    const destLoc = await geocode(cleanAddr);
+    const cleanedAddr = cleanAddr(o.addr);
+    const destLoc = await geocode(cleanedAddr);
     if (!destLoc) {
       results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败', destLng: '', destLat: '' });
       done++;
