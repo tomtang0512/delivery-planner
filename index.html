@@ -136,6 +136,7 @@
 </div>
 
 <script>
+
 const AMAP_KEY = "e9973067b859c02990c6b19729ffdce7";
 const STORE_ADDR = "清凤时代城";
 const STORE_LNG = '104.045045';
@@ -262,7 +263,7 @@ function parseOrders(text) {
   flush();
   return orders;
 }
-unction parseOrders(text) {
+
 async function getDrivingDistance(origLng, origLat, destLng, destLat) {
   try {
     const url = `${AMAP_DRIVE_URL}?origin=${origLng},${origLat}&destination=${destLng},${destLat}&key=${AMAP_KEY}`;
@@ -529,6 +530,7 @@ function copyPlan() {
 function fallbackCopy(text) {
   const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('✅ 已复制到剪贴板');
 }
+
 </script>
 </body>
 </html>
