@@ -242,7 +242,7 @@ function parseOrders(text) {
       continue;
     }
 
-    // 收件人/会员名
+    // 收件人/会员名（可能含电话和地址）
     const personMatch = trimmed.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personMatch) {
       const raw = personMatch[1];
@@ -250,6 +250,9 @@ function parseOrders(text) {
       currentName = parts[0] || '';
       const pm = raw.match(/1[3-9]\d{9}/);
       if (pm) currentPhone = pm[0];
+      // 提取同一行内的地址（格式：地址：xxx 或 ，地址：xxx）
+      const addrM = raw.match(/[，,]地址[：:]\s*(.+)$/);
+      if (addrM) currentAddr = addrM[1].trim();
       continue;
     }
 
