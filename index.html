@@ -8,53 +8,21 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-    background: #f0f2f5;
-    color: #333;
-    padding: 10px;
-    min-height: 100vh;
+    background: #f0f2f5; color: #333; padding: 10px; min-height: 100vh;
   }
   .container { max-width: 430px; margin: 0 auto; }
 
   /* ===== 头部 ===== */
-  .header {
-    background: linear-gradient(135deg, #1a73e8, #4285f4);
-    border-radius: 16px;
-    padding: 20px 16px;
-    text-align: center;
-    color: #fff;
-    margin-bottom: 10px;
-  }
+  .header { background: linear-gradient(135deg, #1a73e8, #4285f4); border-radius: 16px; padding: 20px 16px; text-align: center; color: #fff; margin-bottom: 10px; }
   .header h1 { font-size: 22px; font-weight: 700; }
   .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
 
   /* ===== 卡片 ===== */
-  .card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .card-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1a73e8;
-    margin-bottom: 10px;
-  }
+  .card { background: #fff; border-radius: 14px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+  .card-title { font-size: 15px; font-weight: 600; color: #1a73e8; margin-bottom: 10px; }
 
   /* ===== 输入区 ===== */
-  .paste-area textarea {
-    width: 100%;
-    min-height: 140px;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    font-size: 13px;
-    line-height: 1.6;
-    resize: vertical;
-    outline: none;
-    background: #fafafa;
-  }
+  .paste-area textarea { width: 100%; min-height: 140px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 13px; line-height: 1.6; resize: vertical; outline: none; background: #fafafa; }
   .paste-area textarea:focus { border-color: #1a73e8; }
   .paste-area textarea::placeholder { color: #bbb; }
   .paste-tip { font-size: 11px; color: #999; margin-top: 6px; }
@@ -62,120 +30,72 @@
   /* ===== 设置行 ===== */
   .settings-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
   .settings-row label { font-size: 14px; color: #555; white-space: nowrap; }
-  .settings-row input {
-    width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 8px;
-    font-size: 14px; text-align: center;
-  }
+  .settings-row input { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; text-align: center; }
 
   /* ===== 按钮 ===== */
-  .btn {
-    width: 100%; padding: 14px; border: none; border-radius: 10px;
-    font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; margin-top: 8px;
-  }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; color: #fff; margin-top: 8px; }
   .btn-primary { background: #34a853; }
   .btn-primary:active { background: #2d8e47; }
   .btn-copy { background: #ea4335; }
   .btn-copy:active { background: #d93025; }
-  .btn-calc { background: #1a73e8; }
-  .btn-calc:active { background: #1557b0; }
 
   /* ===== 结果区 ===== */
   .result-card { display: none; }
   .result-card.show { display: block; }
 
-  /* ===== 统计条 ===== */
-  .stats-bar {
-    display: flex; justify-content: space-around;
-    background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 10px;
-  }
+  .stats-bar { display: flex; justify-content: space-around; background: #f8f9fa; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
   .stat-item { text-align: center; }
   .stat-num { font-size: 22px; font-weight: 700; color: #1a73e8; }
   .stat-label { font-size: 11px; color: #999; margin-top: 2px; }
 
-  /* ===== 汇总 ===== */
   .summary { background: #e8f5e9; border-radius: 10px; padding: 12px; margin-bottom: 10px; font-size: 13px; }
   .summary strong { color: #34a853; }
   .summary .error-count { color: #ff4444; }
 
-  /* ===== 状态 ===== */
   .status { text-align: center; font-size: 13px; color: #1a73e8; margin: 8px 0; min-height: 20px; }
 
   /* ===== 订单卡片 ===== */
-  .order-card {
-    background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #1a73e8;
-  }
+  .order-card { background: #fff; border-radius: 12px; padding: 14px; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border-left: 4px solid #1a73e8; }
   .order-card.error { border-left-color: #ff4444; background: #fff5f5; }
   .order-card.urgent { border-left-color: #ea4335; }
 
-  .card-row {
-    display: flex; align-items: center; margin-bottom: 6px; flex-wrap: wrap;
-  }
+  .card-row { display: flex; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
   .card-row:last-child { margin-bottom: 0; }
 
-  .time-tag {
-    display: inline-block; padding: 4px 10px; border-radius: 12px;
-    font-size: 12px; font-weight: 600; color: #fff;
-  }
+  .time-tag { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; color: #fff; }
   .time-tag.call { background: #34a853; }
   .time-tag.arrive { background: #1a73e8; }
   .time-tag.warn { background: #ea4335; }
 
-  .card-label {
-    font-size: 12px; color: #999; min-width: 50px; text-align: right;
-    flex-shrink: 0;
-  }
-  .card-value {
-    font-size: 13px; font-weight: 500; text-align: left; flex: 1;
-    margin-left: 8px; word-break: break-all;
-  }
+  .card-label { font-size: 12px; color: #999; min-width: 50px; text-align: right; flex-shrink: 0; }
+  .card-value { font-size: 13px; font-weight: 500; text-align: left; flex: 1; margin-left: 8px; word-break: break-all; }
   .card-value.name { font-weight: 700; color: #333; }
   .card-value.dist { color: #ea4335; font-weight: 600; }
-  .card-value.goods { font-size: 12px; color: #666; white-space: normal; overflow: visible; text-overflow: unset; }
-  .card-value.addr { font-size: 12px; color: #666; white-space: normal; overflow: visible; text-overflow: unset; }
+  .card-value.goods { font-size: 12px; color: #666; white-space: normal; }
+  .card-value.addr { font-size: 12px; color: #666; white-space: normal; }
   .card-value.error { font-size: 12px; color: #ff4444; }
 
-  /* 卡片序号 */
-  .card-group {
-    font-size: 11px; color: #1a73e8; font-weight: 600; margin-bottom: 4px;
-    padding: 2px 8px; background: #e8f0fe; border-radius: 6px; display: inline-block;
-  }
+  .card-group { font-size: 11px; color: #1a73e8; font-weight: 600; margin-bottom: 4px; padding: 2px 8px; background: #e8f0fe; border-radius: 6px; display: inline-block; }
 
   /* ===== 可编辑字段 ===== */
-  .editable {
-    border: 1px solid #ddd; border-radius: 6px; padding: 4px 8px;
-    font-size: 12px; color: #666; background: #fafafa; width: 100%;
-    outline: none; font-family: inherit;
-  }
+  .editable { border: 1px solid #ddd; border-radius: 6px; padding: 4px 8px; font-size: 12px; color: #666; background: #fafafa; outline: none; font-family: inherit; }
   .editable:focus { border-color: #1a73e8; background: #fff; }
   .editable.dist-input { width: 70px; display: inline-block; text-align: center; }
 
   /* ===== 操作按钮区 ===== */
-  .card-actions {
-    display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;
-  }
-  .action-btn {
-    padding: 5px 10px; border: none; border-radius: 8px; font-size: 11px;
-    cursor: pointer; color: #fff; flex: 1;
-  }
+  .card-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .action-btn { padding: 5px 10px; border: none; border-radius: 8px; font-size: 11px; cursor: pointer; color: #fff; flex: 1; }
   .action-btn.map { background: #1a73e8; }
-  .action-btn.map:active { background: #1557b0; }
   .action-btn.recalc { background: #fbbc04; color: #333; }
-  .action-btn.recalc:active { background: #e9ab00; }
 
   /* ===== 空状态 ===== */
   .empty-state { text-align: center; padding: 40px 20px; color: #ccc; font-size: 14px; }
   .footer { text-align: center; font-size: 11px; color: #ccc; margin-top: 16px; }
-
-  /* ===== 提示标签 ===== */
-  .warn-badge {
-    display: inline-block; background: #fff3cd; color: #e87908;
-    font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 4px;
-  }
 </style>
 </head>
 <body>
 <div class="container">
+
   <div class="header">
     <h1>🚚 壮壮FIT 叫单规划</h1>
     <p>门店：清凤时代城 · 粘贴订单 → 自动生成 → 编辑纠偏</p>
@@ -193,13 +113,8 @@
 
 2. 冬阴功鸡腿虾仁鲜蔬锅（加荞麦面）+香蕉
 📝收件人：聂先生，13076090208
-🏠地址：新加坡创新中心e栋东门7楼
-
---8/28 11:45--
-3. 牛肉片·鸡腿蛋白Pro碗+香菇牛肉酱
-📝收件人：李涵，18848235524
-🏠地址：成都市武侯区天晖路360号晶科1号商务写字楼"></textarea>
-      <p class="paste-tip">「--日期 时间--」分组 + 序号. 商品 + 收件人 + 地址，自动识别</p>
+🏠地址：新加坡创新中心e栋东门7楼"></textarea>
+      <p class="paste-tip">「--日期 时间--」分组 + 序号. 商品 + 收件人 + 地址</p>
     </div>
     <div class="settings-row">
       <label>预留时间</label>
@@ -217,134 +132,250 @@
     <button class="btn btn-copy" onclick="copyPlan()">📋 一键复制叫单时间表</button>
   </div>
 
-  <p class="footer">壮壮FIT 配送叫单规划工具 · v4</p>
+  <p class="footer">壮壮FIT 配送叫单规划工具 · v5</p>
 </div>
 
 <script>
 const AMAP_KEY = "e9973067b859c02990c6b19729ffdce7";
 const STORE_ADDR = "清凤时代城";
+const STORE_LNG = '104.045045';
+const STORE_LAT = '30.556878';
 const AMAP_GEO_URL = "https://restapi.amap.com/v3/geocode/geo";
 const AMAP_DRIVE_URL = "https://restapi.amap.com/v3/direction/driving";
 
+// ===== 解析订单（支持多种格式）=====
 function parseOrders(text) {
   const orders = [];
-  let currentTime = '', currentGoods = '', currentName = '', currentPhone = '', currentAddr = '', currentNote = '';
+  let currentTime = '';
+  let currentGoods = '';
+  let currentName = '';
+  let currentPhone = '';
+  let currentAddr = '';
+  let currentNote = '';
+
+  // 同地址映射
+  const sharedAddrMap = {};
+
   const lines = text.split('\n');
 
   function flush() {
-    if (currentGoods && currentAddr && currentTime) {
-      orders.push({ goods: currentGoods.trim(), name: currentName.trim(), phone: currentPhone.trim(), addr: currentAddr.trim(), time: currentTime, note: currentNote.trim() });
+    // 检查是否有同地址映射
+    let useAddr = currentAddr;
+    if (currentGoods) {
+      const numMatch = currentGoods.match(/^(\d+)/);
+      if (numMatch) {
+        const orderNum = parseInt(numMatch[1]);
+        useAddr = sharedAddrMap[orderNum] || currentAddr;
+      }
+    }
+    if (currentGoods && currentTime) {
+      orders.push({
+        goods: currentGoods.trim(),
+        name: currentName.trim(),
+        phone: currentPhone.trim(),
+        addr: useAddr.trim(),
+        time: currentTime,
+        note: currentNote.trim()
+      });
     }
   }
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
+
+    // 时间分组：--日期 时间--
     const timeMatch = trimmed.match(/--.*?(\d{1,2}:\d{2})--/);
-    if (timeMatch) { flush(); currentTime = timeMatch[1]; currentGoods = ''; currentName = ''; currentPhone = ''; currentAddr = ''; currentNote = ''; continue; }
-    const goodsMatch = trimmed.match(/^(\d+)\./);
-    if (goodsMatch) { flush(); currentGoods = trimmed.replace(/^\d+\.\s*/, ''); continue; }
-    // 收件人行 — 支持多种格式：📝收件人：张三，138xxxx / 收件人：张三 / 📝张三，138xxxx
-    if (trimmed.includes('收件人') || trimmed.match(/^📝/)) {
-      let raw = trimmed;
-      // 提取 收件人：之后的内容
-      const colonMatch = raw.match(/收件人[：:]\s*(.+)/);
-      if (colonMatch) {
-        raw = colonMatch[1];
-      } else {
-        // 直接 📝 开头带名字
-        const emojiMatch = raw.match(/^📝\s*(.+)/);
-        if (emojiMatch) raw = emojiMatch[1];
-      }
-      if (raw) {
-        const parts = raw.split(/[，,\s]+/);
-        currentName = parts[0] || '';
-        const pm = raw.match(/1[3-9]\d{9}/);
-        if (pm) currentPhone = pm[0];
-      }
+    if (timeMatch) {
+      flush();
+      currentTime = timeMatch[1];
+      currentGoods = '';
+      currentName = '';
+      currentPhone = '';
+      currentAddr = '';
+      currentNote = '';
       continue;
     }
-    if (trimmed.includes('地址')) { const m = trimmed.match(/[：:]\s*(.+)/); if (m) currentAddr = m[1].trim(); continue; }
+
+    // 同地址标题行：⭕7-9餐是同一地址：烁屿健身（中和超级店）
+    const sharedMatch = trimmed.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
+    if (sharedMatch) {
+      const range = sharedMatch[1];
+      const addr = sharedMatch[2].trim();
+      // 支持 7-9, 12-13, 7,9 等格式
+      const numbers = [];
+      range.split(/,/).forEach(part => {
+        part = part.trim();
+        const rangeMatch = part.match(/^(\d+)-(\d+)$/);
+        if (rangeMatch) {
+          for (let i = parseInt(rangeMatch[1]); i <= parseInt(rangeMatch[2]); i++) numbers.push(i);
+        } else {
+          const n = parseInt(part);
+          if (!isNaN(n)) numbers.push(n);
+        }
+      });
+      numbers.forEach(n => { sharedAddrMap[n] = addr; });
+      continue;
+    }
+
+    // 商品行（序号开头）
+    const goodsMatch = trimmed.match(/^(\d+)\./);
+    if (goodsMatch) {
+      flush();
+      currentGoods = trimmed.replace(/^\d+\.\s*/, '');
+      currentName = '';
+      currentPhone = '';
+      currentAddr = '';
+      currentNote = '';
+      continue;
+    }
+
+    // 收件人/会员名 — 支持 🗒会员名：张三 / 🗒收件人：张三，138xxxx / 📝收件人：张三
+    const personMatch = trimmed.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
+    if (personMatch) {
+      const raw = personMatch[1];
+      const parts = raw.split(/[，,\s]+/);
+      currentName = parts[0] || '';
+      const pm = raw.match(/1[3-9]\d{9}/);
+      if (pm) currentPhone = pm[0];
+      continue;
+    }
+
+    // 地址行
+    if (trimmed.includes('地址')) {
+      const m = trimmed.match(/[：:]\s*(.+)/);
+      if (m) currentAddr = m[1].trim();
+      continue;
+    }
   }
-  flush(); return orders;
+
+  flush();
+  return orders;
 }
 
+// ===== 高德地理编码 =====
 async function geocode(address) {
   try {
     const url = `${AMAP_GEO_URL}?address=${encodeURIComponent(address)}&key=${AMAP_KEY}`;
     const resp = await fetch(url);
     const data = await resp.json();
-    if (data.status === '1' && data.count !== '0') { const loc = data.geocodes[0].location.split(','); return { lng: loc[0], lat: loc[1] }; }
+    if (data.status === '1' && data.count !== '0') {
+      const loc = data.geocodes[0].location.split(',');
+      return { lng: loc[0], lat: loc[1] };
+    }
     return null;
   } catch(e) { return null; }
 }
 
+// ===== 驾车距离 =====
 async function getDrivingDistance(origLng, origLat, destLng, destLat) {
   try {
     const url = `${AMAP_DRIVE_URL}?origin=${origLng},${origLat}&destination=${destLng},${destLat}&key=${AMAP_KEY}`;
     const resp = await fetch(url);
     const data = await resp.json();
-    if (data.status === '1') { const path = data.route.paths[0]; return { dist_m: parseInt(path.distance), dur_s: parseInt(path.duration) }; }
+    if (data.status === '1') {
+      const path = data.route.paths[0];
+      return { dist_m: parseInt(path.distance), dur_s: parseInt(path.duration) };
+    }
     return null;
   } catch(e) { return null; }
 }
 
-function parseTime(timeStr) { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; }
-function formatTime(minutes) { const h = Math.floor(minutes / 60), m = minutes % 60; return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); }
+// ===== 时间工具 =====
+function parseTime(timeStr) {
+  const [h, m] = timeStr.split(':').map(Number);
+  return h * 60 + m;
+}
+function formatTime(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
 
-// 门店坐标（清凤时代城）
-const STORE_LNG = '104.045045';
-const STORE_LAT = '30.556878';
-
-// ===== 地图跳转 =====
+// ===== 地图跳转（用坐标，直接跑路线）=====
 function openMap(destName, destAddr, destLng, destLat) {
-  // 用坐标直接跳转，无需手动输入
   window.open(
-    `https://uri.amap.com/direction?from=${STORE_LNG},${STORE_LAT},清凤时代城&to=${destLng || ''},${destLat || ''},${encodeURIComponent(destAddr || destName)}&to_poi=&mode=car`,
+    `https://uri.amap.com/direction?from=${STORE_LNG},${STORE_LAT},清凤时代城&to=${destLng || ''},${destLat || ''},${encodeURIComponent(destAddr || destName)}&mode=car`,
     '_blank'
   );
 }
 
-// ===== 重新计算单笔 =====
+// ===== 重新计算距离 =====
 async function recalcDistance(index) {
   const card = document.getElementById('order-' + index);
   if (!card) return;
   const addrInput = card.querySelector('.addr-input');
   const distInput = card.querySelector('.dist-input');
   const statusSpan = card.querySelector('.recalc-status');
-  
+
   const newAddr = addrInput.value.trim();
-  if (!newAddr) { alert('请输入地址'); return; }
-  
+  if (!newAddr) { statusSpan.textContent = '请输入地址'; return; }
+
   statusSpan.textContent = '计算中...';
-  
-  const storeLoc = await geocode(STORE_ADDR);
-  if (!storeLoc) { statusSpan.textContent = '门店解析失败'; return; }
-  
+
   const destLoc = await geocode(newAddr);
   if (!destLoc) { statusSpan.textContent = '新地址解析失败'; return; }
-  
-  const dist = await getDrivingDistance(storeLoc.lng, storeLoc.lat, destLoc.lng, destLoc.lat);
+
+  const dist = await getDrivingDistance(STORE_LNG, STORE_LAT, destLoc.lng, destLoc.lat);
   if (!dist) { statusSpan.textContent = '路径规划失败'; return; }
-  
+
   const dist_km = dist.dist_m / 1000;
   const ebike_min = Math.round(dist_km / 25 * 60);
-  
   distInput.value = dist_km.toFixed(1);
-  
-  // 重新计算叫单时间
+
+  // 重算叫单时间
   const timeInput = card.querySelector('.time-input');
   const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
   const totalMin = parseTime(timeInput.value);
   const callTime = totalMin - ebike_min - buffer;
   const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
-  
+
   card.querySelector('.call-time-tag').textContent = callTimeStr;
   card.querySelector('.call-time-tag').className = callTimeStr === '⚠ 时间不足' ? 'time-tag warn call-time-tag' : 'time-tag call call-time-tag';
   card.querySelector('.ebike-info').textContent = '约' + ebike_min + 'min';
-  
+
+  // 存坐标供地图用
+  card.dataset.destLng = destLoc.lng;
+  card.dataset.destLat = destLoc.lat;
+
   statusSpan.textContent = '✅ 已更新';
   setTimeout(() => { statusSpan.textContent = ''; }, 2000);
+}
+
+// ===== 更新距离（手动输入）=====
+function updateDistance(index, value) {
+  const card = document.getElementById('order-' + index);
+  if (!card) return;
+  const km = parseFloat(value);
+  if (isNaN(km)) return;
+  const ebike_min = Math.round(km / 25 * 60);
+  card.querySelector('.ebike-info').textContent = ebike_min + 'min';
+
+  const timeInput = card.querySelector('.time-input');
+  const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
+  const totalMin = parseTime(timeInput.value);
+  const callTime = totalMin - ebike_min - buffer;
+  const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
+
+  card.querySelector('.call-time-tag').textContent = callTimeStr;
+  card.querySelector('.call-time-tag').className = callTimeStr === '⚠ 时间不足' ? 'time-tag warn call-time-tag' : 'time-tag call call-time-tag';
+}
+
+// ===== 重算叫单时间（改了送达时间）=====
+function recalcTime(index) {
+  const card = document.getElementById('order-' + index);
+  if (!card) return;
+  const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
+  const distInput = card.querySelector('.dist-input');
+  const km = parseFloat(distInput.value) || 0;
+  const ebike_min = Math.round(km / 25 * 60);
+  const timeInput = card.querySelector('.time-input');
+  const totalMin = parseTime(timeInput.value);
+  const callTime = totalMin - ebike_min - buffer;
+  const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
+
+  card.querySelector('.call-time-tag').textContent = callTimeStr;
+  card.querySelector('.call-time-tag').className = callTimeStr === '⚠ 时间不足' ? 'time-tag warn call-time-tag' : 'time-tag call call-time-tag';
 }
 
 // ===== 渲染订单卡片 =====
@@ -357,7 +388,7 @@ function renderOrderCard(r, index) {
   const ebikeVal = r.ebike_min === '?' ? '' : r.ebike_min;
 
   return `
-    <div class="${cardClass}" id="order-${index}">
+    <div class="${cardClass}" id="order-${index}" data-dest-lng="${r.destLng || ''}" data-dest-lat="${r.destLat || ''}">
       <div class="card-group">订单 ${index}</div>
       <div class="card-row">
         <span class="${timeTagClass}">叫单 ${r.callTime}</span>
@@ -374,14 +405,14 @@ function renderOrderCard(r, index) {
       <div class="card-row">
         <span class="card-label">距离</span>
         <input type="text" class="dist-input editable" value="${distVal}" placeholder="km" onchange="updateDistance(${index}, this.value)" style="width:60px;">
-        <span class="card-value" style="font-size:11px;color:#999;margin-left:4px;">km（电瓶车约 <span class="ebike-info">${ebikeVal || '-'}min</span>）</span>
+        <span style="font-size:11px;color:#999;margin-left:4px;">km（电瓶车约 <span class="ebike-info">${ebikeVal || '-'}min</span>）</span>
       </div>
       <div class="card-row">
         <span class="card-label">地址</span>
         <input type="text" class="addr-input editable" value="${r.addr}" placeholder="地址" onchange="updateAddress(${index}, this.value)">
       </div>
       <div class="card-actions">
-        <button class="action-btn map" onclick="openMap('${r.name}', '${r.addr.replace("'", "\\'")}', '${r.destLng || ''}', '${r.destLat || ''}')" style="font-size:11px;">🗺 地图查看</button>
+        <button class="action-btn map" onclick="openMap('${r.name}', '${r.addr.replace(/'/g, "\\'")}', '${r.destLng || ''}', '${r.destLat || ''}')" style="font-size:11px;">🗺 地图查看</button>
         <button class="action-btn recalc" onclick="recalcDistance(${index})">🔄 重新计算</button>
       </div>
       ${hasError ? `<div class="card-row"><span class="card-value error">❌ ${r.error}</span></div>` : ''}
@@ -390,44 +421,11 @@ function renderOrderCard(r, index) {
   `;
 }
 
-// ===== 更新距离（手动输入） =====
-function updateDistance(index, value) {
-  const card = document.getElementById('order-' + index);
-  if (!card) return;
-  const km = parseFloat(value);
-  if (isNaN(km)) return;
-  const ebike_min = Math.round(km / 25 * 60);
-  card.querySelector('.ebike-info').textContent = ebike_min + 'min';
-  
-  // 重新计算叫单时间
-  const timeInput = card.querySelector('.time-input');
-  const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
-  const totalMin = parseTime(timeInput.value);
-  const callTime = totalMin - ebike_min - buffer;
-  const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
-  
-  card.querySelector('.call-time-tag').textContent = callTimeStr;
-  card.querySelector('.call-time-tag').className = callTimeStr === '⚠ 时间不足' ? 'time-tag warn call-time-tag' : 'time-tag call call-time-tag';
-}
-
+// ===== 更新地址 =====
 function updateAddress(index, value) {
-  // 地址变了，距离可能需要重新计算（下次点"重新计算"时用新地址）
-}
-
-function recalcTime(index) {
   const card = document.getElementById('order-' + index);
   if (!card) return;
-  const timeInput = card.querySelector('.time-input');
-  const buffer = parseInt(document.getElementById('bufferTime').value) || 5;
-  const distInput = card.querySelector('.dist-input');
-  const km = parseFloat(distInput.value) || 0;
-  const ebike_min = Math.round(km / 25 * 60);
-  const totalMin = parseTime(timeInput.value);
-  const callTime = totalMin - ebike_min - buffer;
-  const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
-  
-  card.querySelector('.call-time-tag').textContent = callTimeStr;
-  card.querySelector('.call-time-tag').className = callTimeStr === '⚠ 时间不足' ? 'time-tag warn call-time-tag' : 'time-tag call call-time-tag';
+  card.querySelector('.addr-input').value = value;
 }
 
 // ===== 主流程 =====
@@ -448,22 +446,22 @@ async function parseAndPlan() {
   orderListEl.innerHTML = '<div class="empty-state">📊 计算中...</div>';
   resultCard.classList.add('show');
 
-  const storeLoc = await geocode(STORE_ADDR);
-  if (!storeLoc) { statusEl.textContent = '❌ 门店地址解析失败'; return; }
-
   const results = [];
   let done = 0;
+
   for (const o of orders) {
     const destLoc = await geocode(o.addr);
     if (!destLoc) {
       results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败', destLng: '', destLat: '' });
-      done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
+      done++;
+      statusEl.textContent = '计算中... ' + done + '/' + orders.length;
       continue;
     }
-    const dist = await getDrivingDistance(storeLoc.lng, storeLoc.lat, destLoc.lng, destLoc.lat);
+    const dist = await getDrivingDistance(STORE_LNG, STORE_LAT, destLoc.lng, destLoc.lat);
     if (!dist) {
       results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '路径规划失败', destLng: destLoc.lng, destLat: destLoc.lat });
-      done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
+      done++;
+      statusEl.textContent = '计算中... ' + done + '/' + orders.length;
       continue;
     }
     const dist_km = dist.dist_m / 1000;
@@ -472,7 +470,8 @@ async function parseAndPlan() {
     const callTime = totalMin - ebike_min - buffer;
     const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
     results.push({ ...o, dist_km: dist_km.toFixed(1), ebike_min, callTime: callTimeStr, error: null, destLng: destLoc.lng, destLat: destLoc.lat });
-    done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
+    done++;
+    statusEl.textContent = '计算中... ' + done + '/' + orders.length;
     await new Promise(r => setTimeout(r, 300));
   }
 
@@ -485,15 +484,18 @@ async function parseAndPlan() {
   orderListEl.innerHTML = '';
   let okCount = 0, errCount = 0, totalDist = 0;
   const callTimes = [];
+
   for (let i = 0; i < results.length; i++) {
     const r = results[i];
-    if (r.error) errCount++; else { okCount++; totalDist += parseFloat(r.dist_km) || 0; }
+    if (r.error) errCount++;
+    else { okCount++; totalDist += parseFloat(r.dist_km) || 0; }
     if (r.callTime !== '-' && r.callTime !== '⚠ 时间不足') callTimes.push(r.callTime);
     orderListEl.innerHTML += renderOrderCard(r, i + 1);
   }
 
   const avgDist = okCount > 0 ? (totalDist / okCount).toFixed(1) : '?';
   const earliestCall = callTimes.length > 0 ? callTimes[0] : '-';
+
   statsBar.innerHTML = `
     <div class="stat-item"><div class="stat-num">${orders.length}</div><div class="stat-label">总单数</div></div>
     <div class="stat-item"><div class="stat-num">${okCount}</div><div class="stat-label">成功</div></div>
@@ -512,7 +514,6 @@ function copyPlan() {
   let text = '🚚 壮壮FIT 叫单时间表\n\n门店：清凤时代城\n预留时间：' + document.getElementById('bufferTime').value + '分钟\n\n';
   text += '| 叫单时间 | 送达时间 | 收件人 | 商品 | 距离 | 地址 |\n|---------|---------|--------|------|------|------|\n';
   for (const card of cards) {
-    const id = card.id.replace('order-', '');
     const callTag = card.querySelector('.call-time-tag');
     const callTime = callTag ? callTag.textContent.trim() : '';
     const timeInput = card.querySelector('.time-input');
