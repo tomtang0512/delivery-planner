@@ -244,9 +244,24 @@ function parseOrders(text) {
     if (timeMatch) { flush(); currentTime = timeMatch[1]; currentGoods = ''; currentName = ''; currentPhone = ''; currentAddr = ''; currentNote = ''; continue; }
     const goodsMatch = trimmed.match(/^(\d+)\./);
     if (goodsMatch) { flush(); currentGoods = trimmed.replace(/^\d+\.\s*/, ''); continue; }
-    if (trimmed.includes('收件人')) {
-      const m = trimmed.match(/[：:]\s*(.+)/);
-      if (m) { const parts = m[1].split(/[，,\s]+/); currentName = parts[0] || ''; const pm = m[1].match(/1[3-9]\d{9}/); if (pm) currentPhone = pm[0]; }
+    // 收件人行 — 支持多种格式：📝收件人：张三，138xxxx / 收件人：张三 / 📝张三，138xxxx
+    if (trimmed.includes('收件人') || trimmed.match(/^📝/)) {
+      let raw = trimmed;
+      // 提取 收件人：之后的内容
+      const colonMatch = raw.match(/收件人[：:]\s*(.+)/);
+      if (colonMatch) {
+        raw = colonMatch[1];
+      } else {
+        // 直接 📝 开头带名字
+        const emojiMatch = raw.match(/^📝\s*(.+)/);
+        if (emojiMatch) raw = emojiMatch[1];
+      }
+      if (raw) {
+        const parts = raw.split(/[，,\s]+/);
+        currentName = parts[0] || '';
+        const pm = raw.match(/1[3-9]\d{9}/);
+        if (pm) currentPhone = pm[0];
+      }
       continue;
     }
     if (trimmed.includes('地址')) { const m = trimmed.match(/[：:]\s*(.+)/); if (m) currentAddr = m[1].trim(); continue; }
@@ -277,13 +292,17 @@ async function getDrivingDistance(origLng, origLat, destLng, destLat) {
 function parseTime(timeStr) { const [h, m] = timeStr.split(':').map(Number); return h * 60 + m; }
 function formatTime(minutes) { const h = Math.floor(minutes / 60), m = minutes % 60; return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0'); }
 
+// 门店坐标（清凤时代城）
+const STORE_LNG = '104.045045';
+const STORE_LAT = '30.556878';
+
 // ===== 地图跳转 =====
-function openMap(destName, destAddr) {
-  const storeAddr = encodeURIComponent('清凤时代城');
-  const dest = encodeURIComponent(destAddr || destName);
-  // iPhone/iPad 用高德地图（maps.apple.com 在部分机型上显示异常）
-  // Android 用高德地图
-  window.open(`https://uri.amap.com/navigation?from=清凤时代城&to=${dest}&to_poi=&mode=car`, '_blank');
+function openMap(destName, destAddr, destLng, destLat) {
+  // 用坐标直接跳转，无需手动输入
+  window.open(
+    `https://uri.amap.com/direction?from=${STORE_LNG},${STORE_LAT},清凤时代城&to=${destLng || ''},${destLat || ''},${encodeURIComponent(destAddr || destName)}&to_poi=&mode=car`,
+    '_blank'
+  );
 }
 
 // ===== 重新计算单笔 =====
@@ -362,7 +381,7 @@ function renderOrderCard(r, index) {
         <input type="text" class="addr-input editable" value="${r.addr}" placeholder="地址" onchange="updateAddress(${index}, this.value)">
       </div>
       <div class="card-actions">
-        <button class="action-btn map" onclick="openMap('${r.name}', '${r.addr.replace("'", "\\'")}')" style="font-size:11px;">🗺 地图查看</button>
+        <button class="action-btn map" onclick="openMap('${r.name}', '${r.addr.replace("'", "\\'")}', '${r.destLng || ''}', '${r.destLat || ''}')" style="font-size:11px;">🗺 地图查看</button>
         <button class="action-btn recalc" onclick="recalcDistance(${index})">🔄 重新计算</button>
       </div>
       ${hasError ? `<div class="card-row"><span class="card-value error">❌ ${r.error}</span></div>` : ''}
@@ -437,13 +456,13 @@ async function parseAndPlan() {
   for (const o of orders) {
     const destLoc = await geocode(o.addr);
     if (!destLoc) {
-      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败' });
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败', destLng: '', destLat: '' });
       done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
       continue;
     }
     const dist = await getDrivingDistance(storeLoc.lng, storeLoc.lat, destLoc.lng, destLoc.lat);
     if (!dist) {
-      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '路径规划失败' });
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '路径规划失败', destLng: destLoc.lng, destLat: destLoc.lat });
       done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
       continue;
     }
@@ -452,7 +471,7 @@ async function parseAndPlan() {
     const totalMin = parseTime(o.time);
     const callTime = totalMin - ebike_min - buffer;
     const callTimeStr = callTime > 0 ? formatTime(callTime) : '⚠ 时间不足';
-    results.push({ ...o, dist_km: dist_km.toFixed(1), ebike_min, callTime: callTimeStr, error: null });
+    results.push({ ...o, dist_km: dist_km.toFixed(1), ebike_min, callTime: callTimeStr, error: null, destLng: destLoc.lng, destLat: destLoc.lat });
     done++; statusEl.textContent = '计算中... ' + done + '/' + orders.length;
     await new Promise(r => setTimeout(r, 300));
   }
