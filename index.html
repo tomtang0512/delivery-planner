@@ -264,6 +264,20 @@ function parseOrders(text) {
   return orders;
 }
 
+async function geocode(address) {
+  try {
+    const url = `${AMAP_GEO_URL}?address=${encodeURIComponent(address)}&key=${AMAP_KEY}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.status === '1' && data.count !== '0') {
+      const loc = data.geocodes[0].location.split(',');
+      return { lng: loc[0], lat: loc[1] };
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
+// ===== 驾车距离 =====
 async function getDrivingDistance(origLng, origLat, destLng, destLat) {
   try {
     const url = `${AMAP_DRIVE_URL}?origin=${origLng},${origLat}&destination=${destLng},${destLat}&key=${AMAP_KEY}`;
