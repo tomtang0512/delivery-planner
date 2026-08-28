@@ -281,12 +281,9 @@ function formatTime(minutes) { const h = Math.floor(minutes / 60), m = minutes %
 function openMap(destName, destAddr) {
   const storeAddr = encodeURIComponent('清凤时代城');
   const dest = encodeURIComponent(destAddr || destName);
-  // 优先高德地图，兼容苹果地图
-  if (navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad')) {
-    window.open(`https://maps.apple.com/?dirflag=d&daddr=${dest}&saddr=${storeAddr}`, '_blank');
-  } else {
-    window.open(`https://uri.amap.com/navigation?from=清凤时代城&to=${dest}&to_poi=&mode=car`, '_blank');
-  }
+  // iPhone/iPad 用高德地图（maps.apple.com 在部分机型上显示异常）
+  // Android 用高德地图
+  window.open(`https://uri.amap.com/navigation?from=清凤时代城&to=${dest}&to_poi=&mode=car`, '_blank');
 }
 
 // ===== 重新计算单笔 =====
