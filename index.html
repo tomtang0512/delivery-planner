@@ -463,10 +463,16 @@ async function parseAndPlan() {
   let done = 0;
 
   for (const o of orders) {
+    if (!o.addr) {
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '无地址信息（请检查是否漏了🏠地址行或⭕共享地址头）', destLng: '', destLat: '' });
+      done++;
+      statusEl.textContent = '计算中... ' + done + '/' + orders.length;
+      continue;
+    }
     const cleanedAddr = cleanAddr(o.addr);
     const destLoc = await geocode(cleanedAddr);
     if (!destLoc) {
-      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败', destLng: '', destLat: '' });
+      results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败: ' + cleanedAddr, destLng: '', destLat: '' });
       done++;
       statusEl.textContent = '计算中... ' + done + '/' + orders.length;
       continue;
