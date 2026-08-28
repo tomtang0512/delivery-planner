@@ -143,6 +143,31 @@ const STORE_LAT = '30.556878';
 const AMAP_GEO_URL = "https://restapi.amap.com/v3/geocode/geo";
 const AMAP_DRIVE_URL = "https://restapi.amap.com/v3/direction/driving";
 
+// 地址别名/修正表（高德解析不了的地址映射到标准地址）
+const ADDR_ALIASES = {
+  '烁屿健身': '成都市双流区中和',
+  '乐刻feeling': '成都世豪广场伊藤洋华堂',
+  '烁屿': '成都市双流区中和',
+  '乐刻': '成都世豪广场伊藤洋华堂'
+};
+
+// 地址清洗：去掉联系电话等无关信息
+function cleanAddr(addr) {
+  // 去掉 联系电话:xxxxx 这类
+  addr = addr.replace(/联系电话[：:]\d+/, '').trim();
+  // 去掉 电话[：:]\d+ 这类
+  addr = addr.replace(/电话[：:]\d+/, '').trim();
+  // 去掉括号内的联系电话
+  addr = addr.replace(/\（.*?联系电话.*?\）/, '').trim();
+  // 去掉 联系电话: 前缀
+  addr = addr.replace(/^联系电话[：:].*/, '').trim();
+  // 查别名
+  for (const [key, value] of Object.entries(ADDR_ALIASES)) {
+    if (addr.includes(key)) return value;
+  }
+  return addr;
+}
+
 // ===== 解析订单（支持多种格式）=====
 function parseOrders(text) {
   const orders = [];
@@ -420,7 +445,8 @@ async function parseAndPlan() {
   let done = 0;
 
   for (const o of orders) {
-    const destLoc = await geocode(o.addr);
+    const cleanAddr = cleanAddr(o.addr);
+    const destLoc = await geocode(cleanAddr);
     if (!destLoc) {
       results.push({ ...o, dist_km: '?', ebike_min: '?', callTime: '-', error: '地址解析失败', destLng: '', destLat: '' });
       done++;
