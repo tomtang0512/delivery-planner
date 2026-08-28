@@ -148,48 +148,38 @@ function parseOrders(text) {
   const orders = [];
   let currentTime = '';
   let currentGoods = '';
+  let currentOrderNum = 0;
   let currentName = '';
   let currentPhone = '';
   let currentAddr = '';
   let currentNote = '';
-
-  // 同地址映射
   const sharedAddrMap = {};
-
   const lines = text.split('\n');
 
   function flush() {
-    // 检查是否有同地址映射
-    let useAddr = currentAddr;
-    if (currentGoods) {
-      const numMatch = currentGoods.match(/^(\d+)/);
-      if (numMatch) {
-        const orderNum = parseInt(numMatch[1]);
-        useAddr = sharedAddrMap[orderNum] || currentAddr;
-      }
-    }
-    if (currentGoods && currentTime) {
-      orders.push({
-        goods: currentGoods.trim(),
-        name: currentName.trim(),
-        phone: currentPhone.trim(),
-        addr: useAddr.trim(),
-        time: currentTime,
-        note: currentNote.trim()
-      });
-    }
+    if (!currentGoods || !currentTime) return;
+    const useAddr = sharedAddrMap[currentOrderNum] || currentAddr;
+    orders.push({
+      goods: currentGoods.trim(),
+      name: currentName.trim(),
+      phone: currentPhone.trim(),
+      addr: useAddr.trim(),
+      time: currentTime,
+      note: currentNote.trim()
+    });
   }
 
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // 时间分组：--日期 时间--
+    // 时间分组
     const timeMatch = trimmed.match(/--.*?(\d{1,2}:\d{2})--/);
     if (timeMatch) {
       flush();
       currentTime = timeMatch[1];
       currentGoods = '';
+      currentOrderNum = 0;
       currentName = '';
       currentPhone = '';
       currentAddr = '';
@@ -197,31 +187,27 @@ function parseOrders(text) {
       continue;
     }
 
-    // 同地址标题行：⭕7-9餐是同一地址：烁屿健身（中和超级店）
+    // 同地址标题行：⭕7-9餐是同一地址：xxx
     const sharedMatch = trimmed.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
     if (sharedMatch) {
       const range = sharedMatch[1];
       const addr = sharedMatch[2].trim();
-      // 支持 7-9, 12-13, 7,9 等格式
       const numbers = [];
       range.split(/,/).forEach(part => {
         part = part.trim();
-        const rangeMatch = part.match(/^(\d+)-(\d+)$/);
-        if (rangeMatch) {
-          for (let i = parseInt(rangeMatch[1]); i <= parseInt(rangeMatch[2]); i++) numbers.push(i);
-        } else {
-          const n = parseInt(part);
-          if (!isNaN(n)) numbers.push(n);
-        }
+        const rm = part.match(/^(\d+)-(\d+)$/);
+        if (rm) { for (let i = parseInt(rm[1]); i <= parseInt(rm[2]); i++) numbers.push(i); }
+        else { const n = parseInt(part); if (!isNaN(n)) numbers.push(n); }
       });
       numbers.forEach(n => { sharedAddrMap[n] = addr; });
       continue;
     }
 
-    // 商品行（序号开头）
+    // 商品行
     const goodsMatch = trimmed.match(/^(\d+)\./);
     if (goodsMatch) {
       flush();
+      currentOrderNum = parseInt(goodsMatch[1]);
       currentGoods = trimmed.replace(/^\d+\.\s*/, '');
       currentName = '';
       currentPhone = '';
@@ -230,7 +216,7 @@ function parseOrders(text) {
       continue;
     }
 
-    // 收件人/会员名 — 支持 🗒会员名：张三 / 🗒收件人：张三，138xxxx / 📝收件人：张三
+    // 收件人/会员名
     const personMatch = trimmed.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personMatch) {
       const raw = personMatch[1];
@@ -248,26 +234,10 @@ function parseOrders(text) {
       continue;
     }
   }
-
   flush();
   return orders;
 }
-
-// ===== 高德地理编码 =====
-async function geocode(address) {
-  try {
-    const url = `${AMAP_GEO_URL}?address=${encodeURIComponent(address)}&key=${AMAP_KEY}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-    if (data.status === '1' && data.count !== '0') {
-      const loc = data.geocodes[0].location.split(',');
-      return { lng: loc[0], lat: loc[1] };
-    }
-    return null;
-  } catch(e) { return null; }
-}
-
-// ===== 驾车距离 =====
+unction parseOrders(text) {
 async function getDrivingDistance(origLng, origLat, destLng, destLat) {
   try {
     const url = `${AMAP_DRIVE_URL}?origin=${origLng},${origLat}&destination=${destLng},${destLat}&key=${AMAP_KEY}`;
