@@ -132,7 +132,7 @@
     <button class="btn btn-copy" onclick="copyPlan()">📋 一键复制叫单时间表</button>
   </div>
 
-  <p class="footer">壮壮FIT 配送叫单规划工具 · v5</p>
+  <p class="footer">壮壮FIT 配送叫单规划工具 · v7</p>
 </div>
 
 <script>
@@ -169,7 +169,7 @@ function cleanAddr(addr) {
   return addr;
 }
 
-// ===== 解析订单（支持多种格式）=====
+// ===== 解析订单（支持多种格式）v7 =====
 function parseOrders(text) {
   const orders = [];
   let currentTime = '';
@@ -195,12 +195,63 @@ function parseOrders(text) {
     });
   }
 
+  // 预处理：把"🏠地址: xxx2. 商品名"这种合并行拆开
+  const processedLines = [];
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!trimmed) continue;
+    if (!trimmed) { processedLines.push(''); continue; }
+
+    const addrMarker = trimmed.search(/[🏠]?地址[：:]/);
+    if (addrMarker >= 0) {
+      const afterMarker = trimmed.substring(addrMarker);
+      const goodsMatches = [];
+      const r = /\d+\./g;
+      let m;
+      while ((m = r.exec(afterMarker)) !== null) {
+        const beforeChar = afterMarker[m.index - 1];
+        if (!beforeChar || !/\d/.test(beforeChar)) {
+          goodsMatches.push({ start: m.index, text: m[0] });
+        }
+      }
+
+      if (goodsMatches.length > 0) {
+        const last = goodsMatches[goodsMatches.length - 1];
+        const goodsPos = addrMarker + last.start;
+        const addrPart = trimmed.substring(0, goodsPos).trim();
+        const goodsPart = afterMarker.substring(last.start).trim();
+        processedLines.push(addrPart);
+        processedLines.push(goodsPart);
+        continue;
+      }
+    }
+
+    processedLines.push(trimmed);
+  }
+
+  // 第二遍：处理"收件人：xxx，地址：yyy"同一行
+  const finalLines = [];
+  for (const line of processedLines) {
+    if (!line) { finalLines.push(''); continue; }
+
+    const personWithAddr = line.match(/^(?:🗒|📝)?(?:会员名|收件人)[：:]\s*(.+)$/);
+    if (personWithAddr) {
+      const raw = personWithAddr[1];
+      const addrInPerson = raw.match(/[，,]\s*地址[：:]\s*(.+)$/);
+      if (addrInPerson) {
+        const personPart = line.substring(0, line.indexOf(addrInPerson[0])).trim();
+        finalLines.push(personPart);
+        finalLines.push('地址：' + addrInPerson[1].trim());
+        continue;
+      }
+    }
+    finalLines.push(line);
+  }
+
+  for (const line of finalLines) {
+    if (!line) continue;
 
     // 时间分组
-    const timeMatch = trimmed.match(/--.*?(\d{1,2}:\d{2})--/);
+    const timeMatch = line.match(/--.*?(\d{1,2}:\d{2}).*--/);
     if (timeMatch) {
       flush();
       currentTime = timeMatch[1];
@@ -214,7 +265,7 @@ function parseOrders(text) {
     }
 
     // 同地址标题行：⭕7-9餐是同一地址：xxx
-    const sharedMatch = trimmed.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
+    const sharedMatch = line.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
     if (sharedMatch) {
       const range = sharedMatch[1];
       const addr = sharedMatch[2].trim();
@@ -229,37 +280,65 @@ function parseOrders(text) {
       continue;
     }
 
-    // 商品行
-    const goodsMatch = trimmed.match(/^(\d+)\./);
+    // 商品行（数字. 开头）
+    const goodsMatch = line.match(/^(\d+)\./);
     if (goodsMatch) {
       flush();
       currentOrderNum = parseInt(goodsMatch[1]);
-      currentGoods = trimmed.replace(/^\d+\.\s*/, '');
+      currentGoods = line.replace(/^\d+\.\s*/, '');
       currentName = '';
       currentPhone = '';
-      currentAddr = '';
+      // 注意：不重置 currentAddr，让地址在同一个时间组内跨订单延续
       currentNote = '';
       continue;
     }
 
-    // 收件人/会员名（可能含电话和地址）
-    const personMatch = trimmed.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
+    // 🗒收件人/📝收件人/🗒会员名
+    const personMatch = line.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personMatch) {
       const raw = personMatch[1];
       const parts = raw.split(/[，,\s]+/);
       currentName = parts[0] || '';
       const pm = raw.match(/1[3-9]\d{9}/);
       if (pm) currentPhone = pm[0];
-      // 提取同一行内的地址（格式：地址：xxx 或 ，地址：xxx）
-      const addrM = raw.match(/[，,]地址[：:]\s*(.+)$/);
-      if (addrM) currentAddr = addrM[1].trim();
+      continue;
+    }
+
+    // 收件人（无🗒前缀）
+    const plainPersonMatch = line.match(/^收件人[：:]\s*(.+)$/);
+    if (plainPersonMatch) {
+      const raw = plainPersonMatch[1];
+      currentName = raw.replace(/\d{11}/, '').trim();
+      const pm = raw.match(/1[3-9]\d{9}/);
+      if (pm) currentPhone = pm[0];
+      continue;
+    }
+
+    // 会员名（无🗒前缀）
+    const plainMemberMatch = line.match(/^会员名[：:]\s*(.+)$/);
+    if (plainMemberMatch) {
+      currentName = plainMemberMatch[1].trim();
+      continue;
+    }
+
+    // 🏠地址行
+    const houseAddrMatch = line.match(/^🏠地址[：:]\s*(.+)$/);
+    if (houseAddrMatch) {
+      currentAddr = houseAddrMatch[1].trim();
       continue;
     }
 
     // 地址行
-    if (trimmed.includes('地址')) {
-      const m = trimmed.match(/[：:]\s*(.+)/);
-      if (m) currentAddr = m[1].trim();
+    const addrMatch = line.match(/^地址[：:]\s*(.+)$/);
+    if (addrMatch) {
+      currentAddr = addrMatch[1].trim();
+      continue;
+    }
+
+    // 住址行
+    const juzhuMatch = line.match(/^住址[：:]\s*(.+)$/);
+    if (juzhuMatch) {
+      currentAddr = juzhuMatch[1].trim();
       continue;
     }
   }
