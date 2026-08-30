@@ -132,7 +132,7 @@
     <button class="btn btn-copy" onclick="copyPlan()">📋 一键复制叫单时间表</button>
   </div>
 
-  <p class="footer">壮壮FIT 配送叫单规划工具 · v7</p>
+  <p class="footer">壮壮FIT 配送叫单规划工具 · v8</p>
 </div>
 
 <script>
@@ -169,25 +169,29 @@ function cleanAddr(addr) {
   return addr;
 }
 
-// ===== 解析订单（支持多种格式）v7 =====
+// ===== 解析订单 v8 =====
 function parseOrders(text) {
-  const orders = [];
-  let currentTime = '';
-  let currentGoods = '';
-  let currentOrderNum = 0;
-  let currentName = '';
-  let currentPhone = '';
-  let currentAddr = '';
-  let currentNote = '';
-  const sharedAddrMap = {};
-  const lines = text.split('\n');
+  var orders = [];
+  var currentTime = '';
+  var currentGoods = '';
+  var currentOrderNum = 0;
+  var currentName = '';
+  var currentPhone = '';
+  var currentAddr = '';
+  var currentNote = '';
+  var sharedAddrMap = {};
+  var sharedNameMap = {};
+  var pendingNameOrders = [];
+  var lines = text.split('\n');
 
   function flush() {
     if (!currentGoods || !currentTime) return;
-    const useAddr = sharedAddrMap[currentOrderNum] || currentAddr;
+    var useAddr = sharedAddrMap[currentOrderNum] || currentAddr;
+    var useName = sharedNameMap[currentOrderNum] || currentName;
     orders.push({
+      orderNum: currentOrderNum,
       goods: currentGoods.trim(),
-      name: currentName.trim(),
+      name: useName.trim(),
       phone: currentPhone.trim(),
       addr: useAddr.trim(),
       time: currentTime,
@@ -195,50 +199,46 @@ function parseOrders(text) {
     });
   }
 
-  // 预处理：把"🏠地址: xxx2. 商品名"这种合并行拆开
-  const processedLines = [];
-  for (const line of lines) {
-    const trimmed = line.trim();
+  var processedLines = [];
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i];
+    var trimmed = line.trim();
     if (!trimmed) { processedLines.push(''); continue; }
-
-    const addrMarker = trimmed.search(/[🏠]?地址[：:]/);
+    var addrMarker = trimmed.search(/[🏠]?地址[：:]/);
     if (addrMarker >= 0) {
-      const afterMarker = trimmed.substring(addrMarker);
-      const goodsMatches = [];
-      const r = /\d+\./g;
-      let m;
-      while ((m = r.exec(afterMarker)) !== null) {
-        const beforeChar = afterMarker[m.index - 1];
+      var afterMarker = trimmed.substring(addrMarker);
+      var goodsMatches = [];
+      var r = /\d+\./g;
+      var m2;
+      while ((m2 = r.exec(afterMarker)) !== null) {
+        var beforeChar = afterMarker[m2.index - 1];
         if (!beforeChar || !/\d/.test(beforeChar)) {
-          goodsMatches.push({ start: m.index, text: m[0] });
+          goodsMatches.push({ start: m2.index, text: m2[0] });
         }
       }
-
       if (goodsMatches.length > 0) {
-        const last = goodsMatches[goodsMatches.length - 1];
-        const goodsPos = addrMarker + last.start;
-        const addrPart = trimmed.substring(0, goodsPos).trim();
-        const goodsPart = afterMarker.substring(last.start).trim();
+        var last = goodsMatches[goodsMatches.length - 1];
+        var goodsPos = addrMarker + last.start;
+        var addrPart = trimmed.substring(0, goodsPos).trim();
+        var goodsPart = afterMarker.substring(last.start).trim();
         processedLines.push(addrPart);
         processedLines.push(goodsPart);
         continue;
       }
     }
-
     processedLines.push(trimmed);
   }
 
-  // 第二遍：处理"收件人：xxx，地址：yyy"同一行
-  const finalLines = [];
-  for (const line of processedLines) {
+  var finalLines = [];
+  for (var i = 0; i < processedLines.length; i++) {
+    var line = processedLines[i];
     if (!line) { finalLines.push(''); continue; }
-
-    const personWithAddr = line.match(/^(?:🗒|📝)?(?:会员名|收件人)[：:]\s*(.+)$/);
+    var personWithAddr = line.match(/^(?:🗒|📝)?(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personWithAddr) {
-      const raw = personWithAddr[1];
-      const addrInPerson = raw.match(/[，,]\s*地址[：:]\s*(.+)$/);
+      var raw = personWithAddr[1];
+      var addrInPerson = raw.match(/[，,]\s*地址[：:]\s*(.+)$/);
       if (addrInPerson) {
-        const personPart = line.substring(0, line.indexOf(addrInPerson[0])).trim();
+        var personPart = line.substring(0, line.indexOf(addrInPerson[0])).trim();
         finalLines.push(personPart);
         finalLines.push('地址：' + addrInPerson[1].trim());
         continue;
@@ -247,11 +247,10 @@ function parseOrders(text) {
     finalLines.push(line);
   }
 
-  for (const line of finalLines) {
+  for (var i = 0; i < finalLines.length; i++) {
+    var line = finalLines[i];
     if (!line) continue;
-
-    // 时间分组
-    const timeMatch = line.match(/--.*?(\d{1,2}:\d{2}).*--/);
+    var timeMatch = line.match(/--.*?(\d{1,2}:\d{2}).*--/);
     if (timeMatch) {
       flush();
       currentTime = timeMatch[1];
@@ -263,86 +262,77 @@ function parseOrders(text) {
       currentNote = '';
       continue;
     }
-
-    // 同地址标题行：⭕7-9餐是同一地址：xxx
-    const sharedMatch = line.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
+    var sharedMatch = line.match(/^⭕(\d+(?:[,-]\d+)*)\s*(.+)$/);
     if (sharedMatch) {
-      const range = sharedMatch[1];
-      const addr = sharedMatch[2].trim();
-      const numbers = [];
-      range.split(/,/).forEach(part => {
+      var range = sharedMatch[1];
+      var content = sharedMatch[2].trim();
+      var numbers = [];
+      range.split(/,/).forEach(function(part) {
         part = part.trim();
-        const rm = part.match(/^(\d+)-(\d+)$/);
-        if (rm) { for (let i = parseInt(rm[1]); i <= parseInt(rm[2]); i++) numbers.push(i); }
-        else { const n = parseInt(part); if (!isNaN(n)) numbers.push(n); }
+        var rm = part.match(/^(\d+)-(\d+)$/);
+        if (rm) { for (var k = parseInt(rm[1]); k <= parseInt(rm[2]); k++) numbers.push(k); }
+        else { var n = parseInt(part); if (!isNaN(n)) numbers.push(n); }
       });
-      numbers.forEach(n => { sharedAddrMap[n] = addr; });
+      if (content.indexOf('收件人') >= 0) {
+        numbers.forEach(function(n) { pendingNameOrders.push(n); });
+      } else {
+        numbers.forEach(function(n) { sharedAddrMap[n] = content.trim(); });
+      }
       continue;
     }
-
-    // 商品行（数字. 开头）
-    const goodsMatch = line.match(/^(\d+)\./);
+    var goodsMatch = line.match(/^(\d+)\./);
     if (goodsMatch) {
       flush();
       currentOrderNum = parseInt(goodsMatch[1]);
       currentGoods = line.replace(/^\d+\.\s*/, '');
       currentName = '';
       currentPhone = '';
-      // 注意：不重置 currentAddr，让地址在同一个时间组内跨订单延续
       currentNote = '';
       continue;
     }
-
-    // 🗒收件人/📝收件人/🗒会员名
-    const personMatch = line.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
+    var personMatch = line.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personMatch) {
-      const raw = personMatch[1];
-      const parts = raw.split(/[，,\s]+/);
+      var raw = personMatch[1];
+      var parts = raw.split(/[，,\s]+/);
       currentName = parts[0] || '';
-      const pm = raw.match(/1[3-9]\d{9}/);
+      var pm = raw.match(/1[3-9]\d{9}/);
       if (pm) currentPhone = pm[0];
+      var newlyFilled = [];
+      for (var j = 0; j < pendingNameOrders.length; j++) {
+        var n = pendingNameOrders[j];
+        if (!sharedNameMap[n]) {
+          sharedNameMap[n] = currentName;
+          newlyFilled.push(n);
+        }
+      }
+      for (var j = 0; j < newlyFilled.length; j++) {
+        var idx = pendingNameOrders.indexOf(newlyFilled[j]);
+        if (idx >= 0) pendingNameOrders.splice(idx, 1);
+      }
       continue;
     }
-
-    // 收件人（无🗒前缀）
-    const plainPersonMatch = line.match(/^收件人[：:]\s*(.+)$/);
+    var plainPersonMatch = line.match(/^收件人[：:]\s*(.+)$/);
     if (plainPersonMatch) {
-      const raw = plainPersonMatch[1];
+      var raw = plainPersonMatch[1];
       currentName = raw.replace(/\d{11}/, '').trim();
-      const pm = raw.match(/1[3-9]\d{9}/);
+      var pm = raw.match(/1[3-9]\d{9}/);
       if (pm) currentPhone = pm[0];
       continue;
     }
-
-    // 会员名（无🗒前缀）
-    const plainMemberMatch = line.match(/^会员名[：:]\s*(.+)$/);
+    var plainMemberMatch = line.match(/^会员名[：:]\s*(.+)$/);
     if (plainMemberMatch) {
       currentName = plainMemberMatch[1].trim();
-      continue;
-    }
+      var newlyFilled = [];
+      for (var j = 0; j < pendingNameOrders.length; j++) {
+        var n = pendingNameOrders[j];
+        if (!sharedNameMap[n]) {
+          sharedNameMap[n] = currentName;
+          newlyFilled.push(n);
+        }
+      }
+      for (var j = 0; j < newlyFilled.length; j++) {
+        var idx = pendingNameOrders.indexOf(newlyFilled[j]);
 
-    // 🏠地址行
-    const houseAddrMatch = line.match(/^🏠地址[：:]\s*(.+)$/);
-    if (houseAddrMatch) {
-      currentAddr = houseAddrMatch[1].trim();
-      continue;
-    }
-
-    // 地址行
-    const addrMatch = line.match(/^地址[：:]\s*(.+)$/);
-    if (addrMatch) {
-      currentAddr = addrMatch[1].trim();
-      continue;
-    }
-
-    // 住址行
-    const juzhuMatch = line.match(/^住址[：:]\s*(.+)$/);
-    if (juzhuMatch) {
-      currentAddr = juzhuMatch[1].trim();
-      continue;
-    }
-  }
-  flush();
   return orders;
 }
 
