@@ -229,6 +229,27 @@ function parseOrders(text) {
     processedLines.push(trimmed);
   }
 
+  // ===== 拆分 🗒xxx🏠地址 合并行 =====
+  var splitLines = [];
+  for (var i = 0; i < processedLines.length; i++) {
+    var line = processedLines[i];
+    if (!line) { splitLines.push(''); continue; }
+    var bangIdx = line.indexOf('🗒');
+    var houseIdx = line.indexOf('🏠');
+    if (bangIdx >= 0 && houseIdx > bangIdx) {
+      var afterBang = line.substring(bangIdx + 1, houseIdx);
+      if (!afterBang.match(/^(收件人|会员名)/)) {
+        var recipientPart = line.substring(0, houseIdx).trim();
+        var addrPart = line.substring(houseIdx).trim();
+        splitLines.push(recipientPart);
+        splitLines.push(addrPart);
+        continue;
+      }
+    }
+    splitLines.push(line);
+  }
+  processedLines = splitLines;
+
   var finalLines = [];
   for (var i = 0; i < processedLines.length; i++) {
     var line = processedLines[i];
@@ -290,7 +311,7 @@ function parseOrders(text) {
       currentNote = '';
       continue;
     }
-    var personMatch = line.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
+    var personMatch = line.match(/^(?:🗒|📝)\s*(?:会员名|收件人)[：:]\s*(.+)$/);
     if (personMatch) {
       var raw = personMatch[1];
       var parts = raw.split(/[，,\s]+/);
@@ -309,6 +330,13 @@ function parseOrders(text) {
         var idx = pendingNameOrders.indexOf(newlyFilled[j]);
         if (idx >= 0) pendingNameOrders.splice(idx, 1);
       }
+      continue;
+    }
+    // 🗒/📝 直接跟姓名+电话，无关键词（如 🗒范女士，13458572415）
+    var bareNameMatch = line.match(/^(?:🗒|📝)\s*([^，,\n]+?)[，,]?\s*(1[3-9]\d{9})?$/);
+    if (bareNameMatch) {
+      currentName = bareNameMatch[1].trim();
+      if (bareNameMatch[2]) currentPhone = bareNameMatch[2];
       continue;
     }
     var plainPersonMatch = line.match(/^收件人[：:]\s*(.+)$/);
