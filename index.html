@@ -169,7 +169,7 @@ function cleanAddr(addr) {
   return addr;
 }
 
-// ===== 解析订单 v8 =====
+// ===== 解析订单（支持多种格式）=====
 function parseOrders(text) {
   var orders = [];
   var currentTime = '';
@@ -332,7 +332,130 @@ function parseOrders(text) {
       }
       for (var j = 0; j < newlyFilled.length; j++) {
         var idx = pendingNameOrders.indexOf(newlyFilled[j]);
+        if (idx >= 0) pendingNameOrders.splice(idx, 1);
+      }
+      continue;
+    }
+    var houseAddrMatch = line.match(/^🏠地址[：:]\s*(.+)$/);
+    if (houseAddrMatch) {
+      currentAddr = houseAddrMatch[1].trim();
+      continue;
+    }
+    var addrMatch = line.match(/^地址[：:]\s*(.+)$/);
+    if (addrMatch) {
+      currentAddr = addrMatch[1].trim();
+      continue;
+    }
+    var juzhuMatch = line.match(/^住址[：:]\s*(.+)$/);
+    if (juzhuMatch) {
+      currentAddr = juzhuMatch[1].trim();
+      continue;
+    }
+  }
+  flush();
 
+  for (var i = 0; i < orders.length; i++) {
+    var order = orders[i];
+    if (!order.name && sharedNameMap[order.orderNum]) {
+      order.name = sharedNameMap[order.orderNum];
+    }
+  }
+
+  return orders;
+}unction parseOrders(text) {
+  const orders = [];
+  let currentTime = '';
+  let currentGoods = '';
+  let currentOrderNum = 0;
+  let currentName = '';
+  let currentPhone = '';
+  let currentAddr = '';
+  let currentNote = '';
+  const sharedAddrMap = {};
+  const lines = text.split('\n');
+
+  function flush() {
+    if (!currentGoods || !currentTime) return;
+    const useAddr = sharedAddrMap[currentOrderNum] || currentAddr;
+    orders.push({
+      goods: currentGoods.trim(),
+      name: currentName.trim(),
+      phone: currentPhone.trim(),
+      addr: useAddr.trim(),
+      time: currentTime,
+      note: currentNote.trim()
+    });
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // 时间分组
+    const timeMatch = trimmed.match(/--.*?(\d{1,2}:\d{2})--/);
+    if (timeMatch) {
+      flush();
+      currentTime = timeMatch[1];
+      currentGoods = '';
+      currentOrderNum = 0;
+      currentName = '';
+      currentPhone = '';
+      currentAddr = '';
+      currentNote = '';
+      continue;
+    }
+
+    // 同地址标题行：⭕7-9餐是同一地址：xxx
+    const sharedMatch = trimmed.match(/^⭕(\d+(?:[,-]\d+)*)\s*.*?[：:]\s*(.+)$/);
+    if (sharedMatch) {
+      const range = sharedMatch[1];
+      const addr = sharedMatch[2].trim();
+      const numbers = [];
+      range.split(/,/).forEach(part => {
+        part = part.trim();
+        const rm = part.match(/^(\d+)-(\d+)$/);
+        if (rm) { for (let i = parseInt(rm[1]); i <= parseInt(rm[2]); i++) numbers.push(i); }
+        else { const n = parseInt(part); if (!isNaN(n)) numbers.push(n); }
+      });
+      numbers.forEach(n => { sharedAddrMap[n] = addr; });
+      continue;
+    }
+
+    // 商品行
+    const goodsMatch = trimmed.match(/^(\d+)\./);
+    if (goodsMatch) {
+      flush();
+      currentOrderNum = parseInt(goodsMatch[1]);
+      currentGoods = trimmed.replace(/^\d+\.\s*/, '');
+      currentName = '';
+      currentPhone = '';
+      currentAddr = '';
+      currentNote = '';
+      continue;
+    }
+
+    // 收件人/会员名（可能含电话和地址）
+    const personMatch = trimmed.match(/^(?:🗒|📝)(?:会员名|收件人)[：:]\s*(.+)$/);
+    if (personMatch) {
+      const raw = personMatch[1];
+      const parts = raw.split(/[，,\s]+/);
+      currentName = parts[0] || '';
+      const pm = raw.match(/1[3-9]\d{9}/);
+      if (pm) currentPhone = pm[0];
+      // 提取同一行内的地址（格式：地址：xxx 或 ，地址：xxx）
+      const addrM = raw.match(/[，,]地址[：:]\s*(.+)$/);
+      if (addrM) currentAddr = addrM[1].trim();
+      continue;
+    }
+
+    // 地址行
+    if (trimmed.includes('地址')) {
+      const m = trimmed.match(/[：:]\s*(.+)/);
+      if (m) currentAddr = m[1].trim();
+      continue;
+    }
+  }
+  flush();
   return orders;
 }
 
